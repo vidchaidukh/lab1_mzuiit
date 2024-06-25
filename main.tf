@@ -51,4 +51,17 @@ resource "aws_instance" "web" {
   tags = {
     Name = "HelloWorld"
   }
+  user_data = <<-EOF
+              #!/bin/bash
+              yum install -y docker
+              systemctl enable docker
+              systemctl start docker
+              sudo chown $USER /var/run/docker.sock
+              docker run -d --name my-web-app -p 80:80 collider41/my-web-app:latest
+              docker run -d \
+                --name watchtower \
+                -v /var/run/docker.sock:/var/run/docker.sock \
+                containrrr/watchtower \
+                --interval 300
+              EOF
 }
