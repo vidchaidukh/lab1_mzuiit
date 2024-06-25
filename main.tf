@@ -1,6 +1,7 @@
 provider "aws" {
   region = "eu-north-1"
 }
+variable "instance_type" {}
 data "aws_ami" "ubuntu" {
   most_recent = true
 
