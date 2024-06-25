@@ -17,39 +17,27 @@ data "aws_ami" "ubuntu" {
 
   owners = ["099720109477"] # Canonical
 }
-resource "aws_security_group" "web_sg" {
-  name        = "web_sg"
-  description = "Allow HTTP and SSH traffic"
+variable "security_group_id" {
 
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+ type    = string
 
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+ default = "sg-0ddff07b4d83363cf"
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+}
+
+data "aws_security_group" "selected" {
+
+ id = var.security_group_id
+
 }
 resource "aws_instance" "web" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.micro"
   key_name = "key_mzuiit"
-  vpc_security_group_ids = [aws_security_group.web_sg.id]
+  vpc_security_group_ids = [data.aws_security_group.selected.id]
   associate_public_ip_address = true
   tags = {
-    Name = "HelloWorld"
+    Name = "lab2_mzuiit"
   }
   user_data = <<-EOF
               #!/bin/bash
