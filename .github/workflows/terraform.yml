@@ -1,34 +1,49 @@
-name: Terraform
+name: 'Terraform'
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
   terraform:
-    name: 'Terraform Apply'
+    name: 'Terraform'
+    env:
+      # AWS secrets
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_DEVOPS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_DEVOPS_SECRET_ACCESS_KEY }}
+
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v3
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -out=tfplan
-
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
-        run: terraform apply -auto-approve tfplan
-
-      - name: Terraform Destroy
-        if: github.event.inputs.destroy == 'true'
-        run: terraform destroy -auto-approve
-
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terraform Init
+      uses: hashicorp/terraform-github-actions@master
+      with:
+        tf_actions_version: 0.14.3
+        tf_actions_subcommand: 'init'
+        tf_actions_working_dir: '.'
+        tf_actions_comment: true
+        args: '-var="instance_type=t3.micro"'
+    
+    - name: Terraform plan
+      uses: hashicorp/terraform-github-actions@master
+      with:
+        tf_actions_version: 0.14.3
+        tf_actions_subcommand: 'plan'
+        tf_actions_working_dir: '.'
+        tf_actions_comment: true
+        args: '-var="instance_type=t3.micro"'
+      
+    - name: Terraform apply
+      uses: hashicorp/terraform-github-actions@master
+      with:
+        tf_actions_version: 0.14.3
+        tf_actions_subcommand: ${{ github.event.inputs.terraform_action }}
+        tf_actions_working_dir: '.'
+        tf_actions_comment: true
+        args: '-auto-approve -var="instance_type=t3.micro"'
