@@ -35,19 +35,15 @@ resource "aws_instance" "web" {
   tags = {
     Name = "lab2_mzuiit"
   }
-  user_data = <<-EOF
+    user_data = <<-EOF
               #!/bin/bash
-              sudo mkdir ~/lab2
-              sudo touch test.txt
-              sudo snap install docker
-              sudo systemctl enable docker
-              sudo systemctl start docker
+              yum install -y docker
+              systemctl enable docker
+              systemctl start docker
               sudo chown $USER /var/run/docker.sock
-              sudo docker run -d --name my-web-app -p 80:80 collider41/my-web-app:latest
-              sudo docker run -d \
-                --name watchtower \
-                -v /var/run/docker.sock:/var/run/docker.sock \
-                containrrr/watchtower \
-                --interval 300
+              docker run -p 80:80 -d nginx
               EOF
+}
+output "public_ip" {
+  value = aws_instance.example.public_ip
 }
