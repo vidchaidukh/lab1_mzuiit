@@ -1,5 +1,5 @@
 provider "aws" {
-  region: "eu-north-1"
+  region = "eu-north-1"
 }
 "aws_ami" "ubuntu" {
   most_recent = true
