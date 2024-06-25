@@ -17,42 +17,27 @@ data "aws_ami" "ubuntu" {
 
   owners = ["099720109477"] # Canonical
 }
- resource "aws_security_group" "web_sg_https" { 
- name    	= "web_sg_https"
-  description = "Allow HTTPS and SSH traffic"
-
-  ingress {
-	from_port   = 22
-	to_port 	= 22
-	protocol	= "tcp"
-	cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-	from_port   = 443
-	to_port 	= 443
-	protocol	= "tcp"
-	cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-	from_port   = 0
-	to_port 	= 0
-	protocol	= "-1"
-	cidr_blocks = ["0.0.0.0/0"]
-  }
+variable "security_group_id" {
+ type	= string
+ default = "sg-0ddff07b4d83363cf"
 }
+
+data "aws_security_group" "selected" {
+ id = var.security_group_id
+}
+
 resource "aws_instance" "web" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.micro"
   key_name = "key_mzuiit"
-  vpc_security_group_ids = [aws_security_group.web_sg_https.id]
+  vpc_security_group_ids = [data.aws_security_group.selected.id]
   associate_public_ip_address = true
   tags = {
     Name = "lab2_mzuiit"
   }
   user_data = <<-EOF
               #!/bin/bash
+              mkdir lab2
               sudo apt update
               sudo snap install docker
               systemctl enable docker
