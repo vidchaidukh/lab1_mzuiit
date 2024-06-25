@@ -1,7 +1,7 @@
 provider "aws" {
   region = "eu-north-1"
 }
-"aws_ami" "ubuntu" {
+data "aws_ami" "ubuntu" {
   most_recent = true
 
   filter {
