@@ -37,10 +37,18 @@ resource "aws_instance" "web" {
   }
     user_data = <<-EOF
               #!/bin/bash
-              yum install -y docker
-              systemctl enable docker
-              systemctl start docker
+              sudo mkdir lab2
+              sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+              sudo touch test.txt
+              sudo snap install docker
+              sudo systemctl enable docker
+              sudo systemctl start docker
               sudo chown $USER /var/run/docker.sock
-              docker run -p 80:80 -d nginx
+              sudo docker run -d --name my-web-app -p 80:80 collider41/my-web-app:latest
+              sudo docker run -d \
+                --name watchtower \
+                -v /var/run/docker.sock:/var/run/docker.sock \
+                containrrr/watchtower \
+                --interval 300
               EOF
 }
