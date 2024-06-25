@@ -36,9 +36,7 @@ resource "aws_instance" "web" {
     Name = "lab2_mzuiit"
   }
   user_data = <<-EOF
-              #!/bin/bash
               mkdir lab2
-              sudo apt update
               sudo snap install docker
               systemctl enable docker
               systemctl start docker
