@@ -44,6 +44,3 @@ resource "aws_instance" "web" {
               docker run -p 80:80 -d nginx
               EOF
 }
-output "public_ip" {
-  value = aws_instance.example.public_ip
-}
