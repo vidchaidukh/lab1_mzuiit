@@ -36,13 +36,15 @@ resource "aws_instance" "web" {
     Name = "lab2_mzuiit"
   }
   user_data = <<-EOF
-              mkdir lab2
+              #!/bin/bash
+              sudo mkdir ~/lab2
+              sudo touch test.txt
               sudo snap install docker
-              systemctl enable docker
-              systemctl start docker
+              sudo systemctl enable docker
+              sudo systemctl start docker
               sudo chown $USER /var/run/docker.sock
-              docker run -d --name my-web-app -p 80:80 collider41/my-web-app:latest
-              docker run -d \
+              sudo docker run -d --name my-web-app -p 80:80 collider41/my-web-app:latest
+              sudo docker run -d \
                 --name watchtower \
                 -v /var/run/docker.sock:/var/run/docker.sock \
                 containrrr/watchtower \
