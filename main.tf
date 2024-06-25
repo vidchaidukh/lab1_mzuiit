@@ -17,24 +17,36 @@ data "aws_ami" "ubuntu" {
 
   owners = ["099720109477"] # Canonical
 }
-variable "security_group_id" {
+ resource "aws_security_group" "web_sg_https" { 
+ name    	= "web_sg_https"
+  description = "Allow HTTPS and SSH traffic"
 
- type    = string
+  ingress {
+	from_port   = 22
+	to_port 	= 22
+	protocol	= "tcp"
+	cidr_blocks = ["0.0.0.0/0"]
+  }
 
- default = "sg-0ddff07b4d83363cf"
+  ingress {
+	from_port   = 443
+	to_port 	= 443
+	protocol	= "tcp"
+	cidr_blocks = ["0.0.0.0/0"]
+  }
 
-}
-
-data "aws_security_group" "selected" {
-
- id = var.security_group_id
-
+  egress {
+	from_port   = 0
+	to_port 	= 0
+	protocol	= "-1"
+	cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 resource "aws_instance" "web" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.micro"
   key_name = "key_mzuiit"
-  vpc_security_group_ids = [data.aws_security_group.selected.id]
+  vpc_security_group_ids = [aws_security_group.web_sg_https.id]
   associate_public_ip_address = true
   tags = {
     Name = "lab2_mzuiit"
@@ -42,15 +54,10 @@ resource "aws_instance" "web" {
   user_data = <<-EOF
               #!/bin/bash
               sudo apt update
-              sudo apt install apt-transport-https ca-certificates curl software-properties-common
-              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-              echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-              sudo apt update
-              apt-cache policy docker-ce
-              sudo apt install docker-ce
-              yum install -y docker
+              sudo snap install docker
               systemctl enable docker
               systemctl start docker
+              sudo chown $USER /var/run/docker.sock
               docker run -d --name my-web-app -p 80:80 collider41/my-web-app:latest
               docker run -d \
                 --name watchtower \
